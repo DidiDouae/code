@@ -36,7 +36,7 @@ jobs:
 
       - name: SSH to PWD - Create Stack File and Deploy
         run: |
-          ssh -v -tt -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=10 PubkeyAcceptedAlgorithms=+ssh-ed25519 -i ~/.ssh/my_swarm_key ip172-18-0-96-csmrg32im2rgO08oouvg@direct.labs.play-with-docker.com << EOF
+          ssh -v -tt -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=10 -o PubkeyAcceptedAlgorithms=+ssh-ed25519 -i ~/.ssh/my_swarm_key ip172-18-0-96-csmrg32im2rgO08oouvg@direct.labs.play-with-docker.com << EOF
             echo "version: '3.8'
             services:
               web:
