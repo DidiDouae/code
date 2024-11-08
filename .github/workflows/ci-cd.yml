@@ -33,22 +33,17 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/my_swarm_key
           chmod 600 ~/.ssh/my_swarm_key
 
-      - name: Connect to Swarm Manager and Deploy
+      - name: SSH to PWD - Docker Login
         env:
           DOCKER_USERNAME: ${{ secrets.MY_DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.MY_DOCKER_PASSWORD }}
         run: |
-          ssh -vvv -T -o StrictHostKeyChecking=no -i ~/.ssh/my_swarm_key root@172-18-0-96-csmrg32im2rgO08oouvg@direct.labs.play-with-docker.com << 'EOF'
-            docker login -u "${MY_DOCKER_USERNAME}" -p "${MY_DOCKER_PASSWORD}"
-            echo "version: '3.8'
-            services:
-              web:
-                image: ${MY_DOCKER_USERNAME}/html-app:latest
-                deploy:
-                  placement:
-                    constraints: [node.role == worker]
-                ports:
-                  - 80:80
-            " > stack.yml
-            docker stack deploy -c stack.yml webapp
-          EOF
+          ssh -tt -o StrictHostKeyChecking=no -i ~/.ssh/my_swarm_key root@172-18-0-96-csmrg32im2rgO08oouvg@direct.labs.play-with-docker.com "docker login -u '${DOCKER_USERNAME}' -p '${DOCKER_PASSWORD}'"
+
+      - name: SSH to PWD - Create Stack File
+        run: |
+          ssh -tt -o StrictHostKeyChecking=no -i ~/.ssh/my_swarm_key root@172-18-0-96-csmrg32im2rgO08oouvg@direct.labs.play-with-docker.com "echo \"version: '3.8'\nservices:\n  web:\n    image: ${DOCKER_USERNAME}/html-app:latest\n    deploy:\n      placement:\n        constraints: [node.role == worker]\n    ports:\n      - 80:80\" > stack.yml"
+
+      - name: SSH to PWD - Deploy Stack
+        run: |
+          ssh -tt -o StrictHostKeyChecking=no -i ~/.ssh/my_swarm_key root@172-18-0-96-csmrg32im2rgO08oouvg@direct.labs.play-with-docker.com "docker stack deploy -c stack.yml webapp"
