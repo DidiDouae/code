@@ -38,7 +38,7 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.MY_DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.MY_DOCKER_PASSWORD }}
         run: |
-          ssh -tt -o StrictHostKeyChecking=no -o ConnectTimeout=60 -i ~/.ssh/my_swarm_key root@ip172-18-0-96-csmrg32im2rgO08oouvg@direct.labs.play-with-docker.com "ls"
+          ssh -i ~/.ssh/my_swarm_key root@ip172-18-0-96-csmrg32im2rgO08oouvg@direct.labs.play-with-docker.com 
 
       - name: SSH to PWD - Create Stack File
         run: |
