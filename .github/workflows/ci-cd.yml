@@ -29,6 +29,7 @@ jobs:
 
       - name: Add SSH private key
         run: |
+          mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/my_swarm_key
           chmod 600 ~/.ssh/my_swarm_key
 
@@ -38,11 +39,11 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.MY_DOCKER_PASSWORD }}
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/my_swarm_key root@192.168.0.28 << 'EOF'
-            docker login -u "${MY_DOCKER_USERNAME}" -p "${MY_DOCKER_PASSWORD}"
+            docker login -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}"
             echo "version: '3.8'
             services:
               web:
-                image: ${MY_DOCKER_USERNAME}/html-app:latest
+                image: ${DOCKER_USERNAME}/html-app:latest
                 deploy:
                   placement:
                     constraints: [node.role == worker]
