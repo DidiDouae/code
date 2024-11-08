@@ -1,5 +1,67 @@
 # FeverTokens Tech Test 
 
+# Task 1
+This repository demonstrates a CI/CD pipeline using GitHub Actions to build, push, and deploy a Dockerized web application. The application displays a simple HTML message, "Good Morning Vietnam," and is deployed on a Docker Swarm cluster.
+
+## Purpose
+The goal of this project is to set up a fully automated workflow that builds and deploys a web application on a Docker Swarm cluster using GitHub Actions. The repository contains:
+- An HTML file (`index.html`) served through an Nginx web server.
+- A `Dockerfile` for containerizing the application.
+- A GitHub Actions workflow to automate Docker image building, tagging, pushing, and deployment on a Docker Swarm cluster.
+
+## Prerequisites
+To follow along or contribute to this project, we will need:
+- A private GitHub repository.
+- Docker Hub account and credentials (username and access token).
+- Access to [Play with Docker (PWD)](https://labs.play-with-docker.com/) for setting up a Docker Swarm cluster.
+
+## Repository Structure
+- **index.html**: HTML file with "Good Morning Vietnam" message.
+- **Dockerfile**: Defines a Docker image using Nginx to serve `index.html`.
+- **ressources/**: Folder for storing images or additional resources for the app.
+- **ci-cd.yml**: GitHub Actions workflow for automating build, push, and deployment to Docker Swarm.
+## Steps Followed 
+
+### 1. Create and Edit Files
+- **index.html**: Add the content `"Good Morning Vietnam"`.
+- **Dockerfile**: Create a Docker image that serves the HTML file using Nginx.
+
+### 2. Set Up GitHub Secrets
+- Add Docker Hub credentials as secrets (`MY_DOCKER_USERNAME` and `MY_DOCKER_TOKEN`).
+- Add SSH secret Key (`SSH_SECRET_KEY` ).
+
+### 3. CI/CD Pipeline Setup
+- **Triggering**: The workflow triggers only on changes to `index.html`.
+- **Building and Pushing the Docker Image**: The pipeline builds and tags the Docker image as `latest` and pushes it to Docker Hub.
+- **Deploying on Docker Swarm**: The workflow connects to the Docker Swarm manager node via SSH, deploying the app using `docker stack deploy` to run only on the worker node on port `80`.
+
+### 4. Workflow File: `.github/workflows/ci-cd.yml`
+- Contains steps to generate an SSH key for connecting to the Swarm manager.
+- Includes Docker build, push, and deployment instructions.
+
+### 5. Docker Swarm Setup
+- **Initialize Docker Swarm**: Start a new session in [Play with Docker](https://labs.play-with-docker.com/).
+![Alt text](/Ressources/Swarm setup)
+- **Setup**: Configure a Docker Swarm cluster with one manager and one worker node.
+
+### Validation and Testing
+
+The CI/CD workflow was triggered correctly upon changes to the `index.html` file, as expected. The pipeline executed the steps for building and tagging the Docker image, followed by pushing the image to Docker Hub. However, during the deployment phase on the Docker Swarm cluster, an issue occurred when attempting to connect to the Docker Swarm manager node via SSH. 
+
+***Troubleshooting Steps***
+
+To resolve the issue, I navigated through several possible causes and attempted many  troubleshooting steps like :
+
+1. **SSH Key Validation**: I verified that the correct SSH key was generated and added to the GitHub Actions workflow using the command `ssh-keygen -t ed25519 -P "" -f ~/.ssh/id_ed25519`. This step was confirmed in the workflow logs, and I ensured the public key was added to the appropriate server.
+
+2. **Port 22 Resetting**: I examined whether there was any issue with port 22 (the default SSH port) on the remote host. I confirmed that the port was open and reachable by checking for any port-specific issues in the network configuration.
+
+3. **SSH Daemon Restart**: I attempted restarting the SSH service on the Docker Swarm manager node by running the `systemctl restart ssh` command. However, the connection was still terminated with the same error message, suggesting the issue was not related to SSH service availability.
+
+4. **Network Connectivity**: Despite validating the network setup and ensuring no firewall blocks on either side, the SSH connection was still refused by the remote host.
+
+### Conclusion
+Despite all troubleshooting efforts, the deployment could not be completed due to the SSH connection being closed by the remote host. Further investigation into the specific network and SSH configuration of the Play with Docker environment is required to pinpoint the exact cause of the issue.
 
 # Task 2
 
