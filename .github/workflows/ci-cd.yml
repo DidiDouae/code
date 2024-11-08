@@ -38,12 +38,12 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.MY_DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.MY_DOCKER_PASSWORD }}
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/my_swarm_key root@172-18-0-96-csmrg32im2rgO08oouvg@direct.labs.play-with-docker.com << 'EOF'
-            docker login -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}"
+          ssh -t -o StrictHostKeyChecking=no -i ~/.ssh/my_swarm_key root@172-18-0-96-csmrg32im2rgO08oouvg@direct.labs.play-with-docker.com << 'EOF'
+            docker login -u "${MY_DOCKER_USERNAME}" -p "${MY_DOCKER_PASSWORD}"
             echo "version: '3.8'
             services:
               web:
-                image: ${DOCKER_USERNAME}/html-app:latest
+                image: ${MY_DOCKER_USERNAME}/html-app:latest
                 deploy:
                   placement:
                     constraints: [node.role == worker]
