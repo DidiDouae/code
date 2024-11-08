@@ -21,30 +21,30 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -t ${{ secrets.MY_DOCKER_USERNAME }}/html-app:latest .
+          docker build -t ${{ secrets.MY_DOCKER_USERNAME }}/html-app:${{ github.sha }} .
 
       - name: Push Docker Image
         run: |
-          docker push ${{ secrets.MY_DOCKER_USERNAME }}/html-app:latest
+          docker push ${{ secrets.MY_DOCKER_USERNAME }}/html-app:${{ github.sha }}
 
       - name: Add SSH private key
         run: |
           mkdir -p ~/.ssh
-	  ssh-keyscan -H direct.labs.play-with-docker.com >> ~/.ssh/known_hosts
+          ssh-keyscan -H direct.labs.play-with-docker.com >> ~/.ssh/known_hosts
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/my_swarm_key
           chmod 600 ~/.ssh/my_swarm_key
 
-      - name: SSH to PWD - Docker Login
-        env:
-          DOCKER_USERNAME: ${{ secrets.MY_DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.MY_DOCKER_PASSWORD }}
+      - name: SSH to PWD - Create Stack File and Deploy
         run: |
-          ssh -tt -i ~/.ssh/my_swarm_key ip172-18-0-96-csmrg32im2rgO08oouvg@direct.labs.play-with-docker.com 
-
-      - name: SSH to PWD - Create Stack File
-        run: |
-          ssh -tt -o StrictHostKeyChecking=no -i ~/.ssh/my_swarm_key root@172-18-0-96-csmrg32im2rgO08oouvg@direct.labs.play-with-docker.com "echo \"version: '3.8'\nservices:\n  web:\n    image: ${DOCKER_USERNAME}/html-app:latest\n    deploy:\n      placement:\n        constraints: [node.role == worker]\n    ports:\n      - 80:80\" > stack.yml"
-
-      - name: SSH to PWD - Deploy Stack
-        run: |
-          ssh -tt -o StrictHostKeyChecking=no -i ~/.ssh/my_swarm_key root@172-18-0-96-csmrg32im2rgO08oouvg@direct.labs.play-with-docker.com "docker stack deploy -c stack.yml webapp"
+          ssh -tt -o StrictHostKeyChecking=no -i ~/.ssh/my_swarm_key root@172-18-0-96-csmrg32im2rgO08oouvg@direct.labs.play-with-docker.com << EOF
+            echo "version: '3.8'
+            services:
+              web:
+                image: ${DOCKER_USERNAME}/html-app:${GITHUB_SHA}
+                deploy:
+                  placement:
+                    constraints: [node.role == worker]
+                ports:
+                  - 80:80" > stack.yml
+            docker stack deploy -c stack.yml webapp
+          EOF
